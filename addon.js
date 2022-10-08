@@ -227,7 +227,7 @@ async function getMeta(url,type,id) {
             poster: getMeta.data.info.cover_big,
             background: getMeta.data.info.backdrop_path[0] || "https://www.stremio.com/website/wallpapers/stremio-wallpaper-5.jpg",
             description: getMeta.data.info.description ||"",
-            releaseInfo: getMeta.data && getMeta.data.info && (getMeta.data.info.releaseDate || getMeta.data.info.releasedate).split("-")[0]
+            releaseInfo: String(getMeta.data && getMeta.data.info && (getMeta.data.info.releaseDate || getMeta.data.info.releasedate).split("-")[0])
         }
     }
        
