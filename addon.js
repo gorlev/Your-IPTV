@@ -39,6 +39,7 @@ function getUserData(userConf) {
         return obj
     }else{
         console.log("Error while parsing!")
+        return {}
     }
 }
 
@@ -84,7 +85,7 @@ async function getManifest(url) {
         version:"1.0.0",
         name:obj.domainName + " IPTV" || "Your IPTV",
         description:`You will access to your ${obj.domainName} IPTV with this addon!`,
-        idPrefixes:[obj.idPrefix],
+        idPrefixes:["tmdb:", obj.idPrefix],
         catalogs:[
             {
                 id:`${obj.idPrefix}movie`,
@@ -164,18 +165,18 @@ async function getCatalog(url,type,genre) {
         let id,name = i.name, poster, posterShape, imdbRating
 
         if(type === "series"){
-            id = obj.idPrefix + i.series_id
-            poster = i.cover
+            id = obj.idPrefix + i.series_id || ""
+            poster = i.cover || ""
             imdbRating = i.rating || ""
             posterShape = "poster"
         }else if(type === "movie"){
-            id = obj.idPrefix + i.stream_id
-            poster = i.stream_icon
+            id = obj.idPrefix + i.stream_id || ""
+            poster = i.stream_icon || ""
             imdbRating = i.rating || ""
             posterShape = "poster"
         }else if (type === "tv"){
-            id = obj.idPrefix + i.stream_id
-            poster = i.stream_icon
+            id = obj.idPrefix + i.stream_id || ""
+            poster = i.stream_icon || ""
             imdbRating = null
             posterShape = "square"
         }
@@ -221,12 +222,12 @@ async function getMeta(url,type,id) {
 
     if(type === "movie"|| type === "series"){
         meta ={
-            id: obj.idPrefix + streamID,
+            id:  "tmdb:"+getMeta.data.info.tmdb_id || obj.idPrefix + streamID || "",
             type,
-            name: getMeta.data.info.name === undefined ? "": getMeta.data.info.name,
-            poster: getMeta.data.info.cover_big,
+            name: getMeta.data.info.name === undefined ? "" : getMeta.data.info.name,
+            poster: getMeta.data.info.cover_big || "",
             background: getMeta.data.info.backdrop_path[0] || "https://www.stremio.com/website/wallpapers/stremio-wallpaper-5.jpg",
-            description: getMeta.data.info.description ||"",
+            description: getMeta.data.info.description || "",
             releaseInfo: String(getMeta.data && getMeta.data.info && (getMeta.data.info.releaseDate || getMeta.data.info.releasedate).split("-")[0])
         }
     }
@@ -239,7 +240,7 @@ async function getMeta(url,type,id) {
         seasons.forEach(season => {
             // console.log(season)
             getMeta.data.episodes[season].forEach(episode => {
-                let id = obj.idPrefix  +episode.id
+                let id = obj.idPrefix + episode.id || ""
                 let title = episode.title || ""
                 let season = episode.season || null
                 let episodeNo = episode.episode_num || null
