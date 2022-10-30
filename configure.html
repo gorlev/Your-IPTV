@@ -228,39 +228,91 @@ button:active {
 
          <div class="separator"></div>
 
-         <label class="label" id="iptvURLLabel" for="iptvURL">Your IPTV URL</label>
-         <input type="text" id="iptvURL" class="input"  placeholder="Enter your Your IPTV M3U Playlist URL here" onchange="generateInstallLink()">
-         <p>e.g. http://DOMAIN.COM:80/get.php?username=USER&password=PASS&type=m3u&output=ts<br>
+         <label class="label" for="listingOption">Listing Option:</label>
+         <select id="listingOption" class="input" onchange="changingListing()">
+            <option value="url" selected>Login via M3U URL</option>
+            <option value="api">Login via Xtream API</option>
+         </select>
+
+         <div class="separator"></div>
+
+
+         <label class="label" id="iptvURLLabel" for="iptvURL">Your IPTV M3U PLlaylist URL</label>
+         <input type="text" id="iptvURL" class="input"  placeholder="Enter your Your IPTV M3U Playlist URL here">
+         <p id="exampleIPTVurl">e.g. http://DOMAIN.COM:80/get.php?username=USER&password=PASS&type=m3u&output=ts</p>
+
+         <label class="label" id="dnsportLabel" for="dnsport">DNS:PORT</label>
+         <input type="text" id="dnsport" class="input"  placeholder="http://url_here.com:port">
+
+         <label class="label" id="usernameLabel" for="username">Username:</label>
+         <input type="text" id="username" class="input"  placeholder="Your Username">
+
+         <label class="label" id="passwordLabel" for="username">Password:</label>
+         <input type="text" id="password" class="input"  placeholder="Your Password">
 
          <div class="separator"></div>
             
          <a id="installLink" class="install-link" href="#">
-            <button name="Install">INSTALL</button>
+            <button onclick="generateInstallLink()" name="Install">INSTALL</button>
          </a>
          
          <div class="separator"></div>
          
          <div id="installLinkInfo">
             <p>ℹ️ If the installation button doesn't work, you can just paste the generated URL into the Stremio addon search bar:  <a href="https://user-images.githubusercontent.com/1777923/43146711-65a33ccc-8f6a-11e8-978e-4c69640e63e3.png" target="_blank">(Tutorial)</a><br>
-               <input type="text" class="input" id="installURL" readonly><button onclick="copy('installURL'); return false;" title="Copy to clipboard">📋</button></p>
+               <input type="text" class="input" id="installURL" readonly><button onclick="generateInstallLink(); 
+               copy('installURL'); 
+               return false;" title="Copy to clipboard">📋</button></p>
          </div>
                        
          <div class="separator"></div>
       </div>
       <script type="text/javascript">
-          $(document).ready(function() {
-            $('#iptvURL').val("");
-            generateInstallLink();
+         $(document).ready(function() {
+            $('#listingOption').val("url")
 
-          });
+            $('#dnsport').toggle()
+            $("#dnsportLabel").toggle()
 
-          function encode(userData) {
+            $('#username').toggle()
+            $("#usernameLabel").toggle()
+
+            $('#password').toggle()
+            $("#passwordLabel").toggle()
+
+            if($('#username').val().length > 0 && $('#password').val().length > 0 && $('#dnsport').val().length > 0){
+               generateInstallLink()
+            }
+         });
+
+         function encode(userData) {
             return btoa(JSON.stringify(userData)).replace(/\+/g, '-').replace(/\//g, '_').split('=')[0]
          }
 
          function copy(id){
             document.getElementById(id).select();
             document.execCommand("copy");
+         }
+
+         function changingListing() {
+
+            const option = $('#listingOption').val()
+
+            $("#dnsport").toggle(option ===  "api")
+            $("#dnsportLabel").toggle(option ==  "api")
+
+            $('#username').toggle(option === "api");
+            $("#usernameLabel").toggle(option ==  "api")
+
+            $('#password').toggle(option === "api");
+            $("#passwordLabel").toggle(option ==  "api")
+
+
+            $('#iptvURL').toggle(option === "url");
+            $("#iptvURLLabel").toggle(option ==  "url")
+
+            $('#exampleIPTVurl').toggle( option === "url")
+            
          }
 
          function getAllUrlParams(url) {
@@ -326,28 +378,66 @@ button:active {
                }
             }
             }
-            obj["BaseURL"] = baseURL
+            obj["BaseURL"] = baseURL || null
             return obj;
          }
 
          function generateInstallLink() {
 
-            const url = $('#iptvURL').val().trim()
-            // console.log(url)
-            const params= getAllUrlParams(url)
-            // console.log(params)
+            var isParametersValid = true
 
-            var queryString = url.split('?')[1]
+            var params = {}, configuration
 
-            const configuration = encode(url)
+            if($('#listingOption').val() === "url"){
+               // console.log("url")
+               
+               var url = $('#iptvURL').val().trim() || ""
+               if(url.length > 0){
+                  // console.log("url:",encode(url))
+                  params = getAllUrlParams(url)
 
-            document.getElementById("installURL").value = window.location.protocol+"//"+window.location.host+"/"+ configuration+ "/manifest.json";
-            
-            if (params && params.username && params.password) {
-               installLink.href = 'stremio://' + window.location.host + '/'  + configuration + '/manifest.json';
-            }else if (params.username == undefined && params.password == undefined && url != ""){
-               alert("Invalid URL!")
+                  if(params && params.output){
+                     delete params.output
+                  }
+                  if(params && params.type){
+                     delete params.type
+                  } 
+                  isParametersValid = true
+               }
+            }else{
+               // console.log("api")
+
+               var BaseURL = $('#dnsport').val().trim() || null
+               var username = $('#username').val().trim() || null
+               var password= $('#password').val().trim()|| null
+
+               params = {username,password,BaseURL}
+               
+               isParametersValid = true
             }
+
+            configuration = encode(params)    
+
+            if(params && params.BaseURL && !params.BaseURL.includes("http") && params.BaseURL.length > 0){
+               isParametersValid = false
+               alert("Please indicate http or http(s) status!")
+            }
+
+            if(params && !params.username){
+               isParametersValid = false
+               alert("Username is missing!")
+            }
+
+            if(params && !params.password){
+               isParametersValid = false
+               alert("Password is missing!")
+            }
+                       
+            if (params && params.username && params.password && params.BaseURL && isParametersValid === true) {
+               installLink.href = 'stremio://' + window.location.host + '/'  + configuration + '/manifest.json';
+               document.getElementById("installURL").value = window.location.protocol+"//"+window.location.host+"/"+ configuration+ "/manifest.json";
+            }
+            
          }
       </script>
 	</body>

@@ -1,6 +1,5 @@
 
 const express = require("express");
-// const landing = require('./landingTemplate');
 const app = express();
 const config = require('./config');
 const MANIFEST = require('./manifest');
@@ -18,7 +17,6 @@ var respond = function (res, data) {
   
 app.engine('html', require('ejs').renderFile);
 app.set('views', __dirname);
-
 
 app.get("/", function (req, res) {
   res.redirect("/configure")
@@ -125,7 +123,6 @@ app.get('/:userConf/meta/:type/:id.json', async function (req,res){
       respond(res,myCache.get(`meta-${userConf}-${type}-${id}`))
     }else{
       const meta = await getMeta(userConf,type,id)
-      // console.log(meta)
       if(meta && meta.id){
         myCache.set(`meta-${userConf}-${type}-${id}`,{meta:meta})
       }
@@ -145,7 +142,6 @@ app.get('/:userConf/stream/:type/:id.json', function (req, res) {
   let extension = "mp4"
   const obj = getUserData(userConf)
   const streamID = id.split(":")[1]
-
   let stream = []
   if(type === "tv"){
     type = "live";

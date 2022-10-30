@@ -1,6 +1,6 @@
 module.exports={
     id: "org.community.YourIPTV",
-    version: "1.0.1",
+    version: "1.1.0",
     name: "Your IPTV",
     logo: "https://dl.strem.io/addon-logo.png",
     description: "This addon brings all the Live Streams, VOD streams and Series from your IPTV subscription to your Stremio using Xtream API.",

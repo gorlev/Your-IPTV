@@ -5,34 +5,51 @@ axios.defaults.method = "GET"
 
 function getUserData(userConf) {
 
-    let url
+    let retrievedData, url, obj = {}
     try {
-        url = JSON.parse(Buffer.from(userConf, 'base64').toString())       
+        retrievedData = JSON.parse(Buffer.from(userConf, 'base64').toString())      
     } catch (error) {
         console.log(error)
         return "error while parsing url"
     }
     
-    const queryString = url.split('?')[1] || "unknown"
-    const baseURL = url.split('/')[0] + "//" + url.split('?')[0].split('/')[2] || "unknown"
+    let domainName,baseURL,idPrefix
 
-    const domainName = url.split("?")[0].split("/")[2].split(":")[0] || "unknown"
+    if(typeof retrievedData === "object"){
+        domainName = retrievedData.BaseURL.split("/")[2].split(":")[0] || "unknown"
+        baseURL = retrievedData.BaseURL
+        idPrefix = domainName.charAt(0) + domainName.substr(Math.ceil(domainName.length / 2 - 1), domainName.length % 2 === 0 ? 2 : 1) + domainName.charAt(domainName.length - 1) + ":";
+        
+        obj = {
+            baseURL,
+            domainName,
+            idPrefix,
+            username:retrievedData.username,
+            password:retrievedData.password
+        }
 
-    const idPrefix = domainName.charAt(0) + domainName.substr(Math.ceil(domainName.length / 2 - 1), domainName.length % 2 === 0 ? 2 : 1) + domainName.charAt(domainName.length - 1) + ":";
-
-    if(queryString === undefined){return {result:"URL does not have any queries!"}}
-    if(baseURL === undefined){return {result:"URL does not seem like an url!"}}
-
-    let obj = {}
-    obj.baseURL = baseURL
-    obj.domainName = domainName
-    obj.idPrefix = idPrefix
-
-    const urlParams = new URLSearchParams(queryString);
-    const entries = urlParams.entries();
-
-    for(const entry of entries) {
-        obj[entry[0]] = entry[1]
+    }else if(retrievedData.includes("http")){
+        url = retrievedData
+        
+        const queryString = url.split('?')[1] || "unknown"
+        baseURL = url.split('/')[0] + "//" + url.split('?')[0].split('/')[2] || "unknown"
+        
+        domainName = url.split("?")[0].split("/")[2].split(":")[0] || "unknown"
+        idPrefix = domainName.charAt(0) + domainName.substr(Math.ceil(domainName.length / 2 - 1), domainName.length % 2 === 0 ? 2 : 1) + domainName.charAt(domainName.length - 1) + ":";
+        
+        if(queryString === undefined){return {result:"URL does not have any queries!"}}
+        if(baseURL === undefined){return {result:"URL does not seem like an url!"}}
+        
+        obj.baseURL = baseURL
+        obj.domainName = domainName
+        obj.idPrefix = idPrefix
+        
+        const urlParams = new URLSearchParams(queryString);
+        const entries = urlParams.entries();
+        
+        for(const entry of entries) {
+            obj[entry[0]] = entry[1]
+        }
     }
 
     if(obj.username && obj.password && obj.baseURL){
@@ -42,10 +59,8 @@ function getUserData(userConf) {
         return {}
     }
 }
-
 async function getManifest(url) {
     const obj = getUserData(url)
-    // console.log(obj)
 
     let response
     try {
@@ -55,7 +70,6 @@ async function getManifest(url) {
         return {error}
     }
     const responseJSON = response.data
-    // console.log(responseJSON)
 
     let movieCatalog = []
     if(responseJSON && responseJSON.categories && responseJSON.categories.movie){    
@@ -85,7 +99,8 @@ async function getManifest(url) {
         version:"1.0.0",
         name:obj.domainName + " IPTV" || "Your IPTV",
         description:`You will access to your ${obj.domainName} IPTV with this addon!`,
-        idPrefixes:["tmdb:", obj.idPrefix],
+        idPrefixes:[obj.idPrefix],
+        // idPrefixes:["tmdb:", obj.idPrefix],
         catalogs:[
             {
                 id:`${obj.idPrefix}movie`,
@@ -117,7 +132,6 @@ async function getManifest(url) {
     return manifest
     
 }
-
 async function getCatalog(url,type,genre) {
 
     const obj = getUserData(url)
@@ -222,7 +236,8 @@ async function getMeta(url,type,id) {
 
     if(type === "movie"|| type === "series"){
         meta ={
-            id:  "tmdb:"+getMeta.data.info.tmdb_id || obj.idPrefix + streamID || "",
+            id: obj.idPrefix + streamID || "",
+            // id:  "tmdb:"+getMeta.data.info.tmdb_id || obj.idPrefix + streamID || "",
             type,
             name: getMeta.data.info.name === undefined ? "" : getMeta.data.info.name,
             poster: getMeta.data.info.cover_big || "",
