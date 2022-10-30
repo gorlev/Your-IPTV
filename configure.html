@@ -343,8 +343,8 @@ button:active {
                var paramValue = typeof (a[1]) === 'undefined' ? true : a[1];
 
                // (optional) keep case consistent
-               paramName = paramName.toLowerCase();
-               if (typeof paramValue === 'string') paramValue = paramValue.toLowerCase();
+               // paramName = paramName.toLowerCase();
+               // if (typeof paramValue === 'string') paramValue = paramValue.toLowerCase();
 
                // if the paramName ends with square brackets, e.g. colors[] or colors[2]
                if (paramName.match(/\[(\d+)?\]$/)) {
@@ -389,7 +389,7 @@ button:active {
             var params = {}, configuration
 
             if($('#listingOption').val() === "url"){
-               // console.log("url")
+               // IF M3U URL OPTION IS SELECTED
                
                var url = $('#iptvURL').val().trim() || ""
                if(url.length > 0){
@@ -405,8 +405,8 @@ button:active {
                   isParametersValid = true
                }
             }else{
-               // console.log("api")
-
+               // IF API OPTION IS SELECTED
+            
                var BaseURL = $('#dnsport').val().trim() || null
                var username = $('#username').val().trim() || null
                var password= $('#password').val().trim()|| null

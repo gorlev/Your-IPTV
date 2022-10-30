@@ -95,7 +95,7 @@ async function getManifest(url) {
         });
     }
     const manifest = {
-        id:"org.community.youriptv",
+        id:`org.community.${obj.domainName}` || "org.community.youriptv",
         version:"1.0.0",
         name:obj.domainName + " IPTV" || "Your IPTV",
         description:`You will access to your ${obj.domainName} IPTV with this addon!`,
@@ -237,7 +237,7 @@ async function getMeta(url,type,id) {
     if(type === "movie"|| type === "series"){
         meta ={
             id: obj.idPrefix + streamID || "",
-            // id:  "tmdb:"+getMeta.data.info.tmdb_id || obj.idPrefix + streamID || "",
+            // id: getMeta.data.info.tmdb_id === undefined ? obj.idPrefix + streamID : "tmdb:"+getMeta.data.info.tmdb_id, // "tmdb:"+getMeta.data.info.tmdb_id || obj.idPrefix + streamID || "",
             type,
             name: getMeta.data.info.name === undefined ? "" : getMeta.data.info.name,
             poster: getMeta.data.info.cover_big || "",
