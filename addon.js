@@ -144,7 +144,8 @@ async function getCatalog(url,type,genre) {
         getCategoryID = await axios({url:`${obj.baseURL}/panel_api.php?username=${obj.username}&password=${obj.password}`})    
     } catch (error) {
         console.log(error)
-        return [{error,errorLocation:"Could not get panel page!"}]
+        return []
+        // return [{error,errorLocation:"Could not get panel page!"}]
     }
 
     let catID
@@ -170,7 +171,8 @@ async function getCatalog(url,type,genre) {
         getCatalogs = await axios({url:`${obj.baseURL}/player_api.php`,method:"GET",params:paramsCat})
     } catch (error) {
         console.log(error)
-        return [{error,errorLocation:"Could not use the parameters wile searching catalogs!"}]
+        // return [{error,errorLocation:"Could not use the parameters wile searching catalogs!"}]
+        return []
     }
 
     let metas = []
@@ -227,7 +229,8 @@ async function getMeta(url,type,id) {
         getMeta = await axios({url:`${obj.baseURL}/player_api.php`,params})
     } catch (error) {
         console.log(error)
-        return [{error,errorLocation:"Could not use the parameters wile searching meta!"}]
+        return {}
+        // return [{error,errorLocation:"Could not use the parameters wile searching meta!"}]
     }
 
     // console.log(getMeta.data)
