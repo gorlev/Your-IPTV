@@ -145,7 +145,6 @@ async function getCatalog(url,type,genre) {
     } catch (error) {
         console.log(error)
         return []
-        // return [{error,errorLocation:"Could not get panel page!"}]
     }
 
     let catID
