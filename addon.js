@@ -196,12 +196,12 @@ async function getCatalog(url,type,genre) {
             posterShape = "poster"
         }else if(type === "movie"){
             id = obj.idPrefix + i.stream_id || ""
-            poster = i.stream_icon || ""
+            poster = getValidUrl(i.stream_icon)
             imdbRating = i.rating || ""
             posterShape = "poster"
         }else if (type === "tv"){
             id = obj.idPrefix + i.stream_id || ""
-            poster = i.stream_icon || ""
+            poster = getValidUrl(i.stream_icon)
             imdbRating = null
             posterShape = "square"
         }
