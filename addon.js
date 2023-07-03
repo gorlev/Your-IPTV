@@ -132,6 +132,16 @@ async function getManifest(url) {
     return manifest
     
 }
+
+function getValidUrl(url) {
+    try {
+        const urlObj = new URL(url);
+        return urlObj.protocol.startsWith('http') ? url : '';
+    } catch {
+        return '';
+    }
+}
+
 async function getCatalog(url,type,genre) {
 
     const obj = getUserData(url)
@@ -181,17 +191,17 @@ async function getCatalog(url,type,genre) {
 
         if(type === "series"){
             id = obj.idPrefix + i.series_id || ""
-            poster = i.cover || ""
+            poster = getValidUrl(i.cover)
             imdbRating = i.rating || ""
             posterShape = "poster"
         }else if(type === "movie"){
             id = obj.idPrefix + i.stream_id || ""
-            poster = i.stream_icon || ""
+            poster = getValidUrl(i.stream_icon)
             imdbRating = i.rating || ""
             posterShape = "poster"
         }else if (type === "tv"){
             id = obj.idPrefix + i.stream_id || ""
-            poster = i.stream_icon || ""
+            poster = getValidUrl(i.stream_icon)
             imdbRating = null
             posterShape = "square"
         }
