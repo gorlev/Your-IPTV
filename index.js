@@ -61,14 +61,7 @@ app.get('/:userConf/manifest.json', async function (req, res) {
 
 app.get('/:userConf/catalog/:type/:id/:extra?.json', async function (req, res) {
   let {userConf,type,id,extra} = req.params
-  let extraObj, userConfiguration
-  
-  // try {
-  //   userConfiguration = JSON.parse(Buffer.from(userConf, 'base64').toString())
-  // } catch (error) {
-  //   console.log(error)
-  //   return []
-  // }
+  let extraObj
 
   if(extra){
     try {
@@ -82,12 +75,6 @@ app.get('/:userConf/catalog/:type/:id/:extra?.json', async function (req, res) {
   if(extraObj && extraObj.genre && extraObj.genre.includes("+")){
     extraObj.genre = extraObj.genre.replace(/\+/g,' ')
   }
-
-  // let pagination
-  // if(extraObj && extraObj.skip){
-  //   pagination =  extra.skip || 1
-  //   pagination = Math.round((Number(extraObj.skip) / 16) + 1 )
-  // }
   
   let metas = []
   try {
@@ -108,10 +95,6 @@ app.get('/:userConf/catalog/:type/:id/:extra?.json', async function (req, res) {
     
   }
     
-  // if(extraObj && extraObj.search){
-  //   metas = await searchCatalogHandler(extraObj.search,userConfiguration.api,pagination,type)
-  // }
-
 });
 
 app.get('/:userConf/meta/:type/:id.json', async function (req,res){
