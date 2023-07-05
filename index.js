@@ -75,7 +75,7 @@ app.get('/:userConf/catalog/:type/:id/:extra?.json', async function (req, res) {
   if(extraObj && extraObj.genre && extraObj.genre.includes("+")){
     extraObj.genre = extraObj.genre.replace(/\+/g,' ')
   }
-  
+
   let metas = []
   try {
 
@@ -142,7 +142,7 @@ app.get('/:userConf/stream/:type/:id.json', function (req, res) {
       description:"Watch Now"
     }]
   }
-  // console.log(stream)
+
   try {
     respond(res,{streams:stream})
   } catch (error) {
