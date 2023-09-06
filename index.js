@@ -15,7 +15,7 @@ var respond = function (res, data) {
     res.send(data);
   };
   
-app.use(express.static('public'))
+// app.use(express.static('public'))
 
 app.engine('html', require('ejs').renderFile);
 app.set('views', __dirname);
