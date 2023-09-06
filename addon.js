@@ -1,6 +1,6 @@
 const axios = require('axios').default;
 axios.defaults.headers.get["content-type"] = "application/json";
-axios.defaults.timeout = 10000
+axios.defaults.timeout = 60000
 axios.defaults.method = "GET"
 
 function getUserData(userConf) {
@@ -62,34 +62,50 @@ function getUserData(userConf) {
 async function getManifest(url) {
     const obj = getUserData(url)
 
-    let response
+    let vod
     try {
-        response = await axios({url:`${obj.baseURL}/panel_api.php?username=${obj.username}&password=${obj.password}`})
+        vod = await axios({url:`${obj.baseURL}/player_api.php?username=${obj.username}&password=${obj.password}&action=get_vod_categories`})
     } catch (error) {
         console.log(error)
         return {error}
     }
-    const responseJSON = response.data
+    const vodJSON = vod.data
 
     let movieCatalog = []
-    if(responseJSON && responseJSON.categories && responseJSON.categories.movie){    
-        responseJSON.categories.movie.forEach(i => {
+        if (vod.status === 200){    
+        vodJSON.forEach(i => {
             let name = i.category_name
             movieCatalog.push(name)
         });
     }
+    let series
+    try {
+        series = await axios({url:`${obj.baseURL}/player_api.php?username=${obj.username}&password=${obj.password}&action=get_series_categories`})
+    } catch (error) {
+        console.log(error)
+        return {error}
+    }
+    const seriesJSON = series.data
 
     let seriesCatalog = []
-    if(responseJSON && responseJSON.categories && responseJSON.categories.series){    
-        responseJSON.categories.series.forEach(i => {
+    if(series.status === 200){    
+        seriesJSON.forEach(i => {
             let name = i.category_name
             seriesCatalog.push(name)
         });
     }
+let live
+    try {
+        live = await axios({url:`${obj.baseURL}/player_api.php?username=${obj.username}&password=${obj.password}&action=get_live_categories`})
+    } catch (error) {
+        console.log(error)
+        return {error}
+    }
+    const liveJSON = live.data
 
     let liveCatalog = []
-    if(responseJSON && responseJSON.categories && responseJSON.categories.live){    
-        responseJSON.categories.live.forEach(i => {
+    if(series.status === 200){    
+        liveJSON.forEach(i => {
             let name = i.category_name
             liveCatalog.push(name)
         });
@@ -100,7 +116,7 @@ async function getManifest(url) {
         name:obj.domainName + " IPTV" || "Your IPTV",
         description:`You will access to your ${obj.domainName} IPTV with this addon!`,
         idPrefixes:[obj.idPrefix],
-        // idPrefixes:["tmdb:", obj.idPrefix],
+        //idPrefixes:["tmdb:", obj.idPrefix],
         catalogs:[
             {
                 id:`${obj.idPrefix}movie`,
@@ -146,20 +162,26 @@ async function getCatalog(url,type,genre) {
 
     const obj = getUserData(url)
 
-    let cat = type==="movie" ? "movie" : type==="series" ? "series": type ==="tv" ? "live" : "error"
+   let getCategoryID
 
-    let getCategoryID
-
-    try {
-        getCategoryID = await axios({url:`${obj.baseURL}/panel_api.php?username=${obj.username}&password=${obj.password}`})    
-    } catch (error) {
+    try { 
+        if(type === "movie"){
+        getCategoryID = await axios({url:`${obj.baseURL}/player_api.php?username=${obj.username}&password=${obj.password}&action=get_vod_categories`})    
+        } 
+        else if(type ==="series"){
+        getCategoryID = await axios({url:`${obj.baseURL}/player_api.php?username=${obj.username}&password=${obj.password}&action=get_series_categories`})    
+        } 
+        else if(type ==="tv"){
+            getCategoryID = await axios({url:`${obj.baseURL}/player_api.php?username=${obj.username}&password=${obj.password}&action=get_live_categories`})    
+        }
+    }catch (error) {
         console.log(error)
         return []
     }
-
+   
     let catID
     
-    getCategoryID.data.categories[cat].forEach(i => {
+    getCategoryID.data.forEach(i => {
         if(i.category_name === genre){
             catID = i.category_id
         }
@@ -248,8 +270,8 @@ async function getMeta(url,type,id) {
 
     if(type === "movie"|| type === "series"){
         meta ={
-            id: obj.idPrefix + streamID || "",
-            // id: getMeta.data.info.tmdb_id === undefined ? obj.idPrefix + streamID : "tmdb:"+getMeta.data.info.tmdb_id, // "tmdb:"+getMeta.data.info.tmdb_id || obj.idPrefix + streamID || "",
+             id: obj.idPrefix + streamID || "",
+             //id: getMeta.data.info.tmdb_id === undefined ? obj.idPrefix + streamID : "tmdb:"+getMeta.data.info.tmdb_id, // "tmdb:"+getMeta.data.info.tmdb_id || obj.idPrefix + streamID || "",
             type,
             name: getMeta.data.info.name === undefined ? "" : getMeta.data.info.name,
             poster: getMeta.data.info.cover_big || "",
